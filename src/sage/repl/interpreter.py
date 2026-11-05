@@ -113,6 +113,21 @@ last prompt and the remainder should not be stripped::
     sage: spt(["   sage: ....:    2+2"])
     ['   2+2']
 
+A ``sage:`` or ``....:`` prompt with nothing after it, like an empty line
+copied from a multiline example, is stripped as well (:issue:`39166`)::
+
+    sage: spt(["sage: x = 1\n", "....:\n", "....: y = 2\n"])
+    ['x = 1\n', '\n', 'y = 2\n']
+    sage: spt(["sage: print('''\n", "....: 123\n", "....:\n", "....: 456''')\n"])
+    ["print('''\n", '123\n', '\n', "456''')\n"]
+    sage: spt(["sage:\n"])
+    ['\n']
+
+A line that is only ``...`` is valid Python, so it is left alone::
+
+    sage: spt(["sage: def f():\n", "....:     ...\n"])
+    ['def f():\n', '    ...\n']
+
 We test that the input transformer is enabled on the Sage command
 line::
 
@@ -506,7 +521,7 @@ def SagePreparseTransformer(lines):
     return lines
 
 
-SagePromptTransformer = PromptStripper(prompt_re=re.compile(r'^(\s*(:?sage: |\.\.\. |\.\.\.\.: ))+'))
+SagePromptTransformer = PromptStripper(prompt_re=re.compile(r'^(\s*(:?sage: |\.\.\. |\.\.\.\.: |sage:$|\.\.\.\.:$))+'))
 
 
 ###################

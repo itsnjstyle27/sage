@@ -737,6 +737,19 @@ class FractionField_generic(ring.Field):
             sage: F(f)
             1/(x^2 + x)
 
+        The base ring of the series does not have to be a field. The series
+        is moved to the base ring of the rational function field first
+        (:issue:`39712`)::
+
+            sage: R.<x> = QQ[]
+            sage: L.<t> = LaurentSeriesRing(R)
+            sage: f = 1 + (x + 1)*t + (x + 1)^2*t^2 + (x + 1)^3*t^3 + O(t^4)
+            sage: F = Frac(Frac(R)['t'])
+            sage: F(f)
+            (-1/(x + 1))/(t - 1/(x + 1))
+            sage: F(f) == F(f.change_ring(Frac(R)))
+            True
+
         ::
 
             sage: K.<x> = FunctionField(QQ)
@@ -776,6 +789,12 @@ class FractionField_generic(ring.Field):
                     from sage.rings.infinity import infinity
                     if x.prec() == infinity:
                         return self(x.laurent_polynomial())
+                    # The approximation inverts parts of the series, so do it
+                    # over the base ring of self, which can be a field when
+                    # the base ring of the series is not (:issue:`39712`).
+                    K = self.ring().base_ring()
+                    if x.base_ring() is not K:
+                        x = x.change_ring(K)
                     return self._convert_from_finite_precision_laurent_series(x)
             ring_one = self.ring().one()
             try:

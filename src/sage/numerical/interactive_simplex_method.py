@@ -3789,6 +3789,25 @@ class LPDictionary(LPAbstractDictionary):
             ....:     import LPDictionary
             sage: D = LPDictionary(A, b, c, 0, R.gens()[2:], R.gens()[:2], "z")
             sage: TestSuite(D).run()
+
+        The objective name can be a polynomial, such as the ``-z`` of the
+        standard form of a minimization problem (:issue:`38933`)::
+
+            sage: A = [[-1/5, 2/5], [2/5, -1/5], [1/5, 1/5]]
+            sage: b = [2, 2, 4]
+            sage: c = [2, 7]
+            sage: P = InteractiveLPProblemStandardForm(A, b, c)
+            sage: DP = P.dual().standard_form()
+            sage: DP.objective_name()
+            -z
+            sage: D = DP.initial_dictionary()
+            sage: D.objective_name()
+            -z
+            sage: D.objective_name() == DP.objective_name()
+            True
+            sage: TestSuite(D).run()
+            sage: DP.final_dictionary().objective_value()
+            -90
         """
         super().__init__()
         # We are going to change stuff while InteractiveLPProblem has immutable data.
@@ -3803,7 +3822,9 @@ class LPDictionary(LPAbstractDictionary):
             B = copy(B)
         if N is nonbasic_variables:
             N = copy(N)
-        self._AbcvBNz = [A, b, c, objective_value, B, N, polygen(ZZ, objective_name)]
+        if not isinstance(objective_name, Polynomial):
+            objective_name = polygen(ZZ, objective_name)
+        self._AbcvBNz = [A, b, c, objective_value, B, N, objective_name]
 
     def __copy__(self):
         r"""

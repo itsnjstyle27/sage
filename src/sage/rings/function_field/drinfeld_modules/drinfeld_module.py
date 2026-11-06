@@ -744,7 +744,32 @@ class DrinfeldModule(Parent, UniqueRepresentation):
             sage: a = A.random_element(5)
             sage: phi(a)[0] == phi.A_field()(a)
             True
+
+        The input must be in the function ring, not only convert to it
+        (:issue:`38295`)::
+
+            sage: phi(z12)
+            Traceback (most recent call last):
+            ...
+            TypeError: z12 is not in the function ring Univariate Polynomial Ring in T over Finite Field in z2 of size 5^2
+
+        ::
+
+            sage: Fq = GF(2)
+            sage: K.<z> = Fq.extension(2)
+            sage: A.<T> = Fq[]
+            sage: phi = DrinfeldModule(A, [z, z, 1])
+            sage: phi(z)
+            Traceback (most recent call last):
+            ...
+            TypeError: z is not in the function ring Univariate Polynomial Ring in T over Finite Field of size 2 (using GF2X)
+            sage: phi(T) == phi.gen()
+            True
+            sage: phi(Fq(1))
+            1
         """
+        if a not in self._function_ring:
+            raise TypeError(f"{a} is not in the function ring {self._function_ring}")
         return self._morphism(a)
 
     def _Hom_(self, other, category):

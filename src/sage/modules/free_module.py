@@ -7696,6 +7696,20 @@ class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
             sage: N.coordinate_ring()
             Univariate Polynomial Ring in x over Rational Field
 
+        The result depends on the basis of ``self``, not only on the module it
+        spans, so equal vector spaces can give different modules when `R` is
+        not a field. To get the elements of ``self`` with coordinates in `R`
+        use :meth:`intersection` with the ambient module over `R` instead::
+
+            sage: M1 = (QQ^2).span_of_basis([(1, 2)])
+            sage: M2 = (QQ^2).span_of_basis([(2, 4)])
+            sage: M1 == M2
+            True
+            sage: M1.change_ring(ZZ) == M2.change_ring(ZZ)
+            False
+            sage: M1.intersection(ZZ^2) == M2.intersection(ZZ^2)
+            True
+
         The ring must be a principal ideal domain::
 
             sage: M.change_ring(ZZ['x'])

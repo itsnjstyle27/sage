@@ -1454,7 +1454,7 @@ class PeriodLattice_ell(PeriodLattice):
             sage: P = ER.lift_x(12.34)
             sage: xP, yP = P.xy()
             sage: xP, yP  # abs tol 1e-15
-            (12.3400000000000, -43.3628968710567)
+            (12.34000000000000000000000000000, -43.36289687105665307069290704073)
             sage: L.e_log_RC(xP, yP)  # abs tol 1e-15
             0.284656841192041
             sage: xP, yP = ER.lift_x(0).xy()  # abs tol 1e-15

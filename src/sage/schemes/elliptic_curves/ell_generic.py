@@ -63,6 +63,7 @@ from sage.rings.polynomial.polynomial_element import polynomial_is_variable
 from sage.rings.polynomial.polynomial_quotient_ring_element import PolynomialQuotientRingElement
 from sage.rings.finite_rings.finite_field_base import FiniteField
 import sage.groups.additive_abelian.additive_abelian_group as groups
+import sage.rings.abc
 from sage.groups import generic
 
 from sage.arith.functions import lcm
@@ -70,7 +71,7 @@ from sage.rings.integer import Integer
 from sage.rings.rational import Rational
 from sage.rings.finite_rings.finite_field_constructor import FiniteField as GF
 from sage.rings.rational_field import RationalField
-from sage.rings.real_mpfr import RealField
+from sage.rings.real_mpfr import RealField, RealLiteral
 from sage.misc.cachefunc import cached_method
 from sage.misc.fast_methods import WithEqualityById
 from sage.structure.coerce import py_scalar_to_element
@@ -915,9 +916,31 @@ class EllipticCurve_generic(WithEqualityById, plane_curve.ProjectivePlaneCurve):
             sage: E = EllipticCurve('37a').short_weierstrass_model().change_ring(GF(17))
             sage: E.lift_x(int(7), all=True)
             [(7 : 3 : 1), (7 : 14 : 1)]
+
+        A literal like ``2.3`` has no precision of its own, so it takes the
+        precision of the curve (:issue:`38364`)::
+
+            sage: E = EllipticCurve(RealField(100), [-1, 0])
+            sage: P = E.lift_x(2.3); P
+            (2.3000000000000000000000000000 : -3.1411781229341324953885242425 : 1.0000000000000000000000000000)
+            sage: P.curve() is E
+            True
+            sage: E = EllipticCurve(ComplexField(100), [-1, 0])
+            sage: E.lift_x(2.3).curve() is E
+            True
+
+        A number that really has 53 bits still gives a point over that field::
+
+            sage: E = EllipticCurve(RealField(100), [-1, 0])
+            sage: E.lift_x(RR(23)/10)
+            (2.30000000000000 : -3.14117812293413 : 1.00000000000000)
         """
         K = self.base_ring()
         x = py_scalar_to_element(x)
+        # A literal has no precision of its own, so use the one of the curve
+        if (isinstance(x, RealLiteral)
+                and isinstance(K, (sage.rings.abc.RealField, sage.rings.abc.ComplexField))):
+            x = K(x)
         L = x.parent()
         E = self
 

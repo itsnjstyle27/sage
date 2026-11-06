@@ -1372,6 +1372,16 @@ cdef class BaseRingFloorDivAction(Action):
             sage: R.<t> = PowerSeriesRing(QQ)
             sage: t // 2
             1/2*t
+
+        Coefficients can round down to zero (:issue:`38590`)::
+
+            sage: R.<x> = ZZ[[]]
+            sage: x // 2
+            0
+            sage: (1 + x) // 3
+            0
+            sage: (3*x + 2) // 2
+            1 + x
         """
         cdef PowerSeries_poly elt = <PowerSeries_poly> x
         prec = x.prec()

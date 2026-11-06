@@ -1222,6 +1222,23 @@ cdef class Polynomial_integer_dense_flint(Polynomial):
 
             sage: (x^2 + 13*x + 169) // 13
             x + 13
+
+        Coefficients that round down to zero are not kept as leading terms
+        (:issue:`38590`)::
+
+            sage: f = x // 2
+            sage: f
+            0
+            sage: f.is_zero(), f.degree(), f == 0
+            (True, -1, True)
+            sage: f = (x^3 + 6*x) // 3
+            sage: f
+            2*x
+            sage: f.degree(), f.list()
+            (1, [0, 2])
+            sage: f = (x^3 + 6*x) // int(3)
+            sage: f.degree(), f.list()
+            (1, [0, 2])
         """
         cdef Polynomial_integer_dense_flint _right
         cdef Polynomial_integer_dense_flint res

@@ -476,6 +476,9 @@ cdef void fmpz_poly_scalar_fdiv_mpz(fmpz_poly_t rop, const fmpz_poly_t op, const
     cdef fmpz_t f
     fmpz_init_set_readonly(f, c)
     fmpz_poly_scalar_fdiv_fmpz(rop, op, f)
+    # FLINT keeps the length of op here, so leading coefficients that rounded
+    # down to zero have to be removed
+    _fmpz_poly_normalise(rop)
     fmpz_clear_readonly(f)
 
 cdef void fmpz_poly_set_coeff_mpz(fmpz_poly_t poly, slong n, const mpz_t x) noexcept:
